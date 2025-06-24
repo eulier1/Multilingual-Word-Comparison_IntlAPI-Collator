@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual Word Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .language-selector {
+            margin-bottom: 30px;
+        }
+
+        .language-selector label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .language-dropdown {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+            color: #2d3748;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-dropdown:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .comparison-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            flex: 1;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            color: #2d3748;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .compare-button {
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            min-width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .compare-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .compare-button:active {
+            transform: translateY(0);
+        }
+
+        .equal-icon {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .result-container {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .result-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .result-details {
+            font-size: 0.95rem;
+            color: #718096;
+            line-height: 1.5;
+        }
+
+        .locale-info {
+            background: rgba(118, 75, 162, 0.1);
+            border: 2px solid rgba(118, 75, 162, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .locale-info h3 {
+            color: #764ba2;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .locale-info p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .comparison-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .compare-button {
+                align-self: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Multilingual Word Comparison</h1>
+        
+        <div class="language-selector">
+            <label for="languageSelect">Choose Language/Locale:</label>
+            <select id="languageSelect" class="language-dropdown">
+                <option value="en">English</option>
+                <option value="es">Spanish (Español)</option>
+                <option value="de">German (Deutsch)</option>
+                <option value="zh">Chinese (中文)</option>
+            </select>
+        </div>
+
+        <div class="comparison-container">
+            <div class="input-group">
+                <label class="input-label" for="text1">Text 1</label>
+                <input type="text" id="text1" class="text-input" value="hello world" placeholder="Enter first text">
+            </div>
+            
+            <button id="compareBtn" class="compare-button" title="Compare texts">
+                <span class="equal-icon">=</span>
+            </button>
+            
+            <div class="input-group">
+                <label class="input-label" for="text2">Text 2</label>
+                <input type="text" id="text2" class="text-input" value="hello world" placeholder="Enter second text">
+            </div>
+        </div>
+
+        <div id="resultContainer" class="result-container" style="display: none;">
+            <div id="resultText" class="result-text"></div>
+            <div id="resultDetails" class="result-details"></div>
+        </div>
+
+        <div class="locale-info">
+            <h3 id="localeTitle">Current Locale: English (en)</h3>
+            <p id="localeDescription">Using English alphabetical sorting rules for comparison.</p>
+        </div>
+    </div>
+
+    <script>
+        // Language configurations
+        const languageConfig = {
+            'en': {
+                name: 'English',
+                locale: 'en-US',
+                description: 'Using English alphabetical sorting rules for comparison.',
+                sampleText: 'hello world'
+            },
+            'es': {
+                name: 'Spanish (Español)',
+                locale: 'es-ES',
+                description: 'Using Spanish alphabetical sorting rules with special character handling (ñ, accents).',
+                sampleText: 'hola mundo'
+            },
+            'de': {
+                name: 'German (Deutsch)',
+                locale: 'de-DE',
+                description: 'Using German alphabetical sorting rules with umlaut handling (ä, ö, ü, ß).',
+                sampleText: 'hallo welt'
+            },
+            'zh': {
+                name: 'Chinese (中文)',
+                locale: 'zh-CN',
+                description: 'Using Chinese sorting rules based on pinyin romanization.',
+                sampleText: '你好世界'
+            }
+        };
+
+        // DOM elements
+        const languageSelect = document.getElementById('languageSelect');
+        const text1Input = document.getElementById('text1');
+        const text2Input = document.getElementById('text2');
+        const compareBtn = document.getElementById('compareBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultText = document.getElementById('resultText');
+        const resultDetails = document.getElementById('resultDetails');
+        const localeTitle = document.getElementById('localeTitle');
+        const localeDescription = document.getElementById('localeDescription');
+
+        let currentLocale = 'en-US';
+
+        // Update locale information
+        function updateLocaleInfo(langCode) {
+            const config = languageConfig[langCode];
+            localeTitle.textContent = `Current Locale: ${config.name} (${langCode})`;
+            localeDescription.textContent = config.description;
+        }
+
+        // Language selection handler
+        languageSelect.addEventListener('change', function() {
+            const selectedLang = this.value;
+            const config = languageConfig[selectedLang];
+            
+            // Update current locale
+            currentLocale = config.locale;
+            
+            // Update both input fields with sample text
+            text1Input.value = config.sampleText;
+            text2Input.value = config.sampleText;
+            
+            // Update locale information
+            updateLocaleInfo(selectedLang);
+            
+            // Hide previous results
+            resultContainer.style.display = 'none';
+            
+            // Add a subtle animation effect
+            text1Input.style.transform = 'scale(1.02)';
+            text2Input.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                text1Input.style.transform = 'scale(1)';
+                text2Input.style.transform = 'scale(1)';
+            }, 200);
+        });
+
+        // Comparison function
+        function compareTexts() {
+            const text1 = text1Input.value.trim();
+            const text2 = text2Input.value.trim();
+            
+            if (!text1 || !text2) {
+                showResult('Please enter text in both fields', 'Enter some text to compare!');
+                return;
+            }
+
+            // Create Intl.Collator for the current locale
+            const collator = new Intl.Collator(currentLocale, {
+                sensitivity: 'base',
+                numeric: true,
+                ignorePunctuation: false
+            });
+
+            // Perform comparison
+            const comparison = collator.compare(text1, text2);
+            
+            let resultMessage, detailMessage;
+            
+            if (comparison === 0) {
+                resultMessage = '✅ Texts are equivalent!';
+                detailMessage = `"${text1}" and "${text2}" are considered equal in ${languageConfig[languageSelect.value].name} collation.`;
+            } else if (comparison < 0) {
+                resultMessage = '📊 Text 1 comes before Text 2';
+                detailMessage = `"${text1}" comes before "${text2}" in ${languageConfig[languageSelect.value].name} alphabetical order.`;
+            } else {
+                resultMessage = '📊 Text 2 comes before Text 1';
+                detailMessage = `"${text2}" comes before "${text1}" in ${languageConfig[languageSelect.value].name} alphabetical order.`;
+            }
+
+            showResult(resultMessage, detailMessage);
+        }
+
+        // Show result with animation
+        function showResult(message, details) {
+            resultText.textContent = message;
+            resultDetails.textContent = details;
+            resultContainer.style.display = 'block';
+            
+            // Trigger animation
+            setTimeout(() => {
+                resultContainer.classList.add('show');
+            }, 10);
+        }
+
+        // Event listeners
+        compareBtn.addEventListener('click', compareTexts);
+
+        // Allow Enter key to trigger comparison
+        text1Input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                compareTexts();
+            }
+        });
+
+        text2Input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                compareTexts();
+            }
+        });
+
+        // Initialize with default locale info
+        updateLocaleInfo('en');
+
+        // Add smooth transitions
+        text1Input.style.transition = 'all 0.2s ease';
+        text2Input.style.transition = 'all 0.2s ease';
+    </script>
+</body>
+</html>
